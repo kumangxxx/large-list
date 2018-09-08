@@ -3,9 +3,6 @@
 const sillyname = require('sillyname')
 const UUID = require('uuid/v4')
 
-const kumang = ' Rahadian Ahmad '
-console.log(kumang.trim(), 'haha')
-
 let data = []
 
 for (var i = 0; i < 4000; i++) {
@@ -42,6 +39,9 @@ setInterval(() => {
 }, 3000)
 
 const App = require('express')()
+const CORS = require('cors')
+
+App.use(CORS())
 
 App.get('/data', (req, res) => {
     res.json(data)
