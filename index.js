@@ -3,6 +3,8 @@
 const sillyname = require('sillyname')
 const UUID = require('uuid/v4')
 
+const randomIndex = () => Math.floor( Math.random() * 4000 )
+
 let data = []
 
 for (var i = 0; i < 4000; i++) {
@@ -38,8 +40,24 @@ setInterval(() => {
     data.push(first)
 }, 3000)
 
+const sockets = {}
+
+setInterval(() => {
+    let item = data[randomIndex()]
+    let date = new Date()
+    item.lastMsgTime = date
+    item.timestamp = date.getTime()
+    item.lastMsg = sillyname()
+
+    Object.keys(sockets).map( k => sockets[k] ).filter( s => s !== '' ).forEach(s => {
+        s.emit('newMessage', item)
+    })
+}, 200)
+
 const App = require('express')()
 const CORS = require('cors')
+const HTTPServer = require('http').Server(App)
+const io = require('socket.io')(HTTPServer)
 
 App.use(CORS())
 
@@ -47,6 +65,14 @@ App.get('/data', (req, res) => {
     res.json(data)
 })
 
-App.listen(4000, () => {
+io.on('connection', (socket) => {
+    console.log('new socket conncetion', socket.id)
+    sockets[socket.id] = socket
+    socket.on('disconnect', () => {
+        sockets[socket.id] = ''
+    })
+})
+
+HTTPServer.listen(4000, null, () => {
     console.log('ok')
 })
